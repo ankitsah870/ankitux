@@ -110,8 +110,6 @@ export const projects: Project[] = [
     scope: "Product · Website",
     role: "UI/UX Designer",
     year: "2026",
-    externalLink: "https://uat.web.upstage.zevon.systems/",
-    externalLinkLabel: "Visit live site",
     overview:
       "Upstage brings speech creation, AI-assisted refinement, practice, and speech management into one workspace, supported by a marketing website that introduces the product and its philosophy. Users can shape a speech, refine its sections, keep their work organized, and prepare for delivery within the same connected experience.",
     designSummary:

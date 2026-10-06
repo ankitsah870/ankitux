@@ -36,10 +36,12 @@ export async function sendProjectBrief(
       body: new URLSearchParams({
         name: brief.name,
         email: brief.email,
-        scope: brief.scope,
-        budget: brief.budget,
+        inquiry_type: brief.inquiryType,
+        ...(brief.scope ? { scope: brief.scope } : {}),
+        ...(brief.budget ? { budget: brief.budget } : {}),
         message: brief.message,
-        _subject: `New project brief from ${brief.name} — ${brief.scope}`,
+        _gotcha: "",
+        _subject: `${brief.inquiryType} from ${brief.name}`,
       }),
     })
 

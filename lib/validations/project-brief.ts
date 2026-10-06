@@ -1,10 +1,11 @@
-import { budgetOptions, scopeOptions, type Budget, type Scope } from "@/content/project-brief"
+import { budgetOptions, inquiryTypes, scopeOptions, type Budget, type InquiryType, type Scope } from "@/content/project-brief"
 
 export type ProjectBrief = {
   name: string
   email: string
-  scope: Scope
-  budget: Budget
+  inquiryType: InquiryType
+  scope?: Scope
+  budget?: Budget
   message: string
 }
 
@@ -13,7 +14,7 @@ export type ProjectBriefValues = Record<ProjectBriefField, string>
 export type ProjectBriefErrors = Partial<Record<ProjectBriefField, string>>
 
 /** Hidden field real visitors never fill in — bots usually do. */
-export const HONEYPOT_FIELD = "website"
+export const HONEYPOT_FIELD = "_gotcha"
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
@@ -26,6 +27,7 @@ export function readProjectBrief(formData: FormData): ProjectBriefValues {
   return {
     name: readField(formData, "name"),
     email: readField(formData, "email"),
+    inquiryType: readField(formData, "inquiryType"),
     scope: readField(formData, "scope"),
     budget: readField(formData, "budget"),
     message: readField(formData, "message"),
@@ -42,11 +44,21 @@ export function validateProjectBrief(
 
   if (!EMAIL_PATTERN.test(values.email)) errors.email = "Enter a valid email so I can reply."
 
-  if (!scopeOptions.includes(values.scope as Scope)) errors.scope = "Pick the closest scope."
-  if (!budgetOptions.includes(values.budget as Budget)) errors.budget = "Pick a budget range."
+  if (!inquiryTypes.includes(values.inquiryType as InquiryType)) errors.inquiryType = "Choose what you’re contacting me about."
 
-  if (values.message.length < 20) errors.message = "A few sentences of context help — at least 20 characters."
-  else if (values.message.length > 4000) errors.message = "Keep it under 4,000 characters."
+  if (values.inquiryType === "Freelance project") {
+    if (!scopeOptions.includes(values.scope as Scope)) errors.scope = "Pick the closest scope."
+    if (!budgetOptions.includes(values.budget as Budget)) errors.budget = "Pick a budget range."
+  }
+
+  const words = values.message.split(/\s+/).filter(Boolean)
+  if (values.message.length < 35 || words.length < 5) errors.message = "Please add a little more context (at least 5 words)."
+  else if (values.message.length > 2000) errors.message = "Keep it under 2,000 characters."
+  else if (/\b(\w+)(?:\s+\1){2,}\b/i.test(values.message) || /(.)\1{9,}/u.test(values.message)) {
+    errors.message = "Please enter a message with a little more detail."
+  } else if ((values.message.match(/https?:\/\//gi) ?? []).length > 2) {
+    errors.message = "Please limit your message to two links."
+  }
 
   if (Object.keys(errors).length > 0) return { success: false, errors }
 

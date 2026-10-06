@@ -49,14 +49,9 @@ function RealtimeGlyph({ isActive }: GlyphProps) {
             width="12"
             height="10"
             rx="2"
-            className="fill-white/12"
             initial={false}
-            animate={isActive ? { fill: ["#ffffff1f", "#e2561a", "#ffffff1f"] } : { fill: "#ffffff1f" }}
-            transition={
-              isActive
-                ? { duration: 1.2, repeat: Infinity, repeatDelay: 1.4, delay: ((index * 7) % 12) * 0.12 }
-                : { duration: 0.3 }
-            }
+            animate={{ fill: isActive ? "#e2561a" : "#ffffff1f" }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
           />
         )
       })}

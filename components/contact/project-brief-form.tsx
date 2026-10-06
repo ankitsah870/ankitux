@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
+import { Check } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -11,7 +12,7 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import { siteConfig } from "@/config/site"
-import { budgetOptions, scopeOptions } from "@/content/project-brief"
+import { budgetOptions, inquiryTypes, scopeOptions } from "@/content/project-brief"
 import { sendProjectBrief, type ProjectBriefState } from "@/lib/actions/send-project-brief"
 import { EASE_OUT_EXPO } from "@/lib/motion"
 import { cn } from "@/lib/utils"
@@ -25,23 +26,33 @@ const selectClassName =
 const labelClassName = "text-[0.8125rem] font-medium tracking-[0.03em] uppercase"
 
 export function ProjectBriefForm({ className }: { className?: string }) {
-  const [attempt, setAttempt] = useState(0)
-
   return (
     <div className={cn("relative overflow-hidden rounded-3xl bg-surface p-6 sm:p-8", className)}>
-      <BriefForm key={attempt} onReset={() => setAttempt((count) => count + 1)} />
+      <BriefForm />
     </div>
   )
 }
 
-function BriefForm({ onReset }: { onReset: () => void }) {
+function BriefForm() {
   const [state, formAction, isPending] = useActionState(sendProjectBrief, initialState)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [inquiryType, setInquiryType] = useState("")
 
   const values = state.status === "invalid" || state.status === "error" ? state.values : undefined
   const errors = state.status === "invalid" ? state.errors : {}
+  const selectedInquiry = inquiryType || values?.inquiryType || ""
 
   useEffect(() => {
     if (state.status === "error") toast.error(state.message)
+    if (state.status === "invalid" || state.status === "error") {
+      setInquiryType(state.values.inquiryType)
+    }
+    if (state.status !== "sent") return
+
+    setInquiryType("")
+    setShowSuccess(true)
+    const timeout = window.setTimeout(() => setShowSuccess(false), 4500)
+    return () => window.clearTimeout(timeout)
   }, [state])
 
   const fieldProps = (field: ProjectBriefField) => ({
@@ -53,54 +64,17 @@ function BriefForm({ onReset }: { onReset: () => void }) {
   })
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      {state.status === "sent" ? (
-        <motion.div
-          key="sent"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: EASE_OUT_EXPO }}
-          className="flex min-h-[30rem] flex-col items-start justify-center gap-6"
-          role="status"
-        >
-          <svg viewBox="0 0 64 64" className="size-16 text-gold" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-            <motion.circle
-              cx="32"
-              cy="32"
-              r="30"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 0.8, ease: EASE_OUT_EXPO }}
-            />
-            <motion.path
-              d="M20 33l8 8 16-17"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 0.5, delay: 0.6, ease: EASE_OUT_EXPO }}
-            />
-          </svg>
-          <div>
-            <h3 className="heading-display text-3xl">Brief received.</h3>
-            <p className="mt-3 max-w-sm text-foreground/75">{siteConfig.replyTime}</p>
-          </div>
-          <Button variant="outline" size="cta" shape="pill" onClick={onReset}>
-            Send another
-          </Button>
-        </motion.div>
-      ) : (
-        <motion.form
-          key="form"
+    <>
+      <motion.form
           action={formAction}
           noValidate
+          autoComplete="on"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, y: -8 }}
           aria-labelledby="project-brief-title"
         >
           <h3 id="project-brief-title" className="text-lg font-semibold text-gold">
-            Project Brief
+            Get in touch
           </h3>
 
           <FieldGroup className="mt-8 gap-6">
@@ -109,7 +83,14 @@ function BriefForm({ onReset }: { onReset: () => void }) {
                 <FieldLabel htmlFor="brief-name" className={labelClassName}>
                   Your name
                 </FieldLabel>
-                <Input {...fieldProps("name")} autoComplete="name" placeholder="Jane Doe" className={controlClassName} />
+                <Input
+                  {...fieldProps("name")}
+                  type="text"
+                  autoComplete="name"
+                  autoCapitalize="words"
+                  placeholder="Jane Doe"
+                  className={controlClassName}
+                />
                 <FieldError id="brief-name-error">{errors.name}</FieldError>
               </Field>
               <Field data-invalid={Boolean(errors.email) || undefined}>
@@ -128,57 +109,83 @@ function BriefForm({ onReset }: { onReset: () => void }) {
               </Field>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-4">
-              <Field data-invalid={Boolean(errors.scope) || undefined}>
-                <FieldLabel htmlFor="brief-scope" className={labelClassName}>
-                  Scope
-                </FieldLabel>
-                {/* Keyed so React's post-action form reset restores the submitted choice. */}
-                <NativeSelect key={values?.scope} {...fieldProps("scope")} className={selectClassName}>
-                  <NativeSelectOption value="" disabled>
-                    What do you need?
+            <Field data-invalid={Boolean(errors.inquiryType) || undefined}>
+              <FieldLabel htmlFor="brief-inquiryType" className={labelClassName}>
+                I’m reaching out about
+              </FieldLabel>
+              <NativeSelect
+                id="brief-inquiryType"
+                name="inquiryType"
+                value={selectedInquiry}
+                onChange={(event) => setInquiryType(event.target.value)}
+                aria-invalid={errors.inquiryType ? true : undefined}
+                aria-describedby={errors.inquiryType ? "brief-inquiryType-error" : undefined}
+                className={selectClassName}
+              >
+                <NativeSelectOption value="" disabled>
+                  Select an inquiry type
+                </NativeSelectOption>
+                {inquiryTypes.map((option) => (
+                  <NativeSelectOption key={option} value={option}>
+                    {option}
                   </NativeSelectOption>
-                  {scopeOptions.map((option) => (
-                    <NativeSelectOption key={option} value={option}>
-                      {option}
+                ))}
+              </NativeSelect>
+              <FieldError id="brief-inquiryType-error">{errors.inquiryType}</FieldError>
+            </Field>
+
+            {selectedInquiry === "Freelance project" ? (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-4">
+                <Field data-invalid={Boolean(errors.scope) || undefined}>
+                  <FieldLabel htmlFor="brief-scope" className={labelClassName}>
+                    Project scope
+                  </FieldLabel>
+                  <NativeSelect key={values?.scope} {...fieldProps("scope")} className={selectClassName}>
+                    <NativeSelectOption value="" disabled>
+                      What do you need?
                     </NativeSelectOption>
-                  ))}
-                </NativeSelect>
-                <FieldError id="brief-scope-error">{errors.scope}</FieldError>
-              </Field>
-              <Field data-invalid={Boolean(errors.budget) || undefined}>
-                <FieldLabel htmlFor="brief-budget" className={labelClassName}>
-                  Budget
-                </FieldLabel>
-                <NativeSelect key={values?.budget} {...fieldProps("budget")} className={selectClassName}>
-                  <NativeSelectOption value="" disabled>
-                    Estimated budget
-                  </NativeSelectOption>
-                  {budgetOptions.map((option) => (
-                    <NativeSelectOption key={option} value={option}>
-                      {option}
+                    {scopeOptions.map((option) => (
+                      <NativeSelectOption key={option} value={option}>
+                        {option}
+                      </NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                  <FieldError id="brief-scope-error">{errors.scope}</FieldError>
+                </Field>
+                <Field data-invalid={Boolean(errors.budget) || undefined}>
+                  <FieldLabel htmlFor="brief-budget" className={labelClassName}>
+                    Project budget
+                  </FieldLabel>
+                  <NativeSelect key={values?.budget} {...fieldProps("budget")} className={selectClassName}>
+                    <NativeSelectOption value="" disabled>
+                      Estimated budget
                     </NativeSelectOption>
-                  ))}
-                </NativeSelect>
-                <FieldError id="brief-budget-error">{errors.budget}</FieldError>
-              </Field>
-            </div>
+                    {budgetOptions.map((option) => (
+                      <NativeSelectOption key={option} value={option}>
+                        {option}
+                      </NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                  <FieldError id="brief-budget-error">{errors.budget}</FieldError>
+                </Field>
+              </div>
+            ) : null}
 
             <Field data-invalid={Boolean(errors.message) || undefined}>
               <FieldLabel htmlFor="brief-message" className={labelClassName}>
-                About the project
+                {selectedInquiry === "Freelance project" ? "About the project" : "Your message"}
               </FieldLabel>
               <Textarea
                 {...fieldProps("message")}
                 rows={5}
-                placeholder="Context, goals, timeline, what great looks like…"
+                placeholder="Share a little context about the project or opportunity…"
                 className={cn(controlClassName, "min-h-32 resize-y py-3")}
               />
               <FieldError id="brief-message-error">{errors.message}</FieldError>
             </Field>
 
             <div aria-hidden className="absolute -left-[9999px] size-px overflow-hidden">
-              <label htmlFor={HONEYPOT_FIELD}>Website</label>
+              <label htmlFor={HONEYPOT_FIELD}>Leave this field empty</label>
               <input id={HONEYPOT_FIELD} name={HONEYPOT_FIELD} type="text" tabIndex={-1} autoComplete="off" />
             </div>
           </FieldGroup>
@@ -190,8 +197,23 @@ function BriefForm({ onReset }: { onReset: () => void }) {
             </Button>
             <p className="text-sm text-muted-foreground">{siteConfig.replyTime}</p>
           </div>
-        </motion.form>
-      )}
-    </AnimatePresence>
+      </motion.form>
+      <AnimatePresence initial={false}>
+        {showSuccess ? (
+          <motion.div
+            key="brief-success"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.25, ease: EASE_OUT_EXPO }}
+            className="mt-5 flex items-center gap-2.5 rounded-xl border border-gold/30 bg-gold/5 px-4 py-3 text-sm text-gold"
+            role="status"
+          >
+            <Check aria-hidden className="size-4 shrink-0" />
+            <span>Message sent! I’ll reply within 24 hours.</span>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </>
   )
 }

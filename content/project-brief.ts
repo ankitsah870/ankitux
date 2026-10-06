@@ -8,6 +8,13 @@ export const scopeOptions = [
   "Not sure yet",
 ] as const
 
+export const inquiryTypes = [
+  "Freelance project",
+  "Full-time opportunity",
+  "Contract opportunity",
+  "General question",
+] as const
+
 export const budgetOptions = [
   "Under $2k",
   "$2k – $5k",
@@ -18,3 +25,4 @@ export const budgetOptions = [
 
 export type Scope = (typeof scopeOptions)[number]
 export type Budget = (typeof budgetOptions)[number]
+export type InquiryType = (typeof inquiryTypes)[number]

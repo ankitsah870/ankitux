@@ -38,6 +38,7 @@ export async function sendProjectBrief(
         email: brief.email,
         inquiry_type: brief.inquiryType,
         ...(brief.scope ? { scope: brief.scope } : {}),
+        ...(brief.budgetCurrency ? { budget_currency: brief.budgetCurrency } : {}),
         ...(brief.budget ? { budget: brief.budget } : {}),
         message: brief.message,
         _gotcha: "",

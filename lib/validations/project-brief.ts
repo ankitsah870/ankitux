@@ -1,11 +1,20 @@
-import { budgetOptions, inquiryTypes, scopeOptions, type Budget, type InquiryType, type Scope } from "@/content/project-brief"
+import {
+  budgetCurrencyOptions,
+  budgetOptionsByCurrency,
+  inquiryTypes,
+  scopeOptions,
+  type BudgetCurrency,
+  type InquiryType,
+  type Scope,
+} from "@/content/project-brief"
 
 export type ProjectBrief = {
   name: string
   email: string
   inquiryType: InquiryType
   scope?: Scope
-  budget?: Budget
+  budgetCurrency?: BudgetCurrency
+  budget?: string
   message: string
 }
 
@@ -29,6 +38,7 @@ export function readProjectBrief(formData: FormData): ProjectBriefValues {
     email: readField(formData, "email"),
     inquiryType: readField(formData, "inquiryType"),
     scope: readField(formData, "scope"),
+    budgetCurrency: readField(formData, "budgetCurrency"),
     budget: readField(formData, "budget"),
     message: readField(formData, "message"),
   }
@@ -48,7 +58,12 @@ export function validateProjectBrief(
 
   if (values.inquiryType === "Freelance project") {
     if (!scopeOptions.includes(values.scope as Scope)) errors.scope = "Pick the closest scope."
-    if (!budgetOptions.includes(values.budget as Budget)) errors.budget = "Pick a budget range."
+    if (!budgetCurrencyOptions.includes(values.budgetCurrency as BudgetCurrency)) {
+      errors.budgetCurrency = "Choose a currency."
+    } else {
+      const options = budgetOptionsByCurrency[values.budgetCurrency as BudgetCurrency] as readonly string[]
+      if (!options.includes(values.budget)) errors.budget = "Pick a budget range."
+    }
   }
 
   const words = values.message.split(/\s+/).filter(Boolean)

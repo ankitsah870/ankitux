@@ -12,7 +12,7 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import { siteConfig } from "@/config/site"
-import { budgetOptions, inquiryTypes, scopeOptions } from "@/content/project-brief"
+import { budgetCurrencyOptions, budgetOptionsByCurrency, inquiryTypes, scopeOptions } from "@/content/project-brief"
 import { sendProjectBrief, type ProjectBriefState } from "@/lib/actions/send-project-brief"
 import { EASE_OUT_EXPO } from "@/lib/motion"
 import { cn } from "@/lib/utils"
@@ -37,19 +37,26 @@ function BriefForm() {
   const [state, formAction, isPending] = useActionState(sendProjectBrief, initialState)
   const [showSuccess, setShowSuccess] = useState(false)
   const [inquiryType, setInquiryType] = useState("")
+  const [budgetCurrency, setBudgetCurrency] = useState("")
 
   const values = state.status === "invalid" || state.status === "error" ? state.values : undefined
   const errors = state.status === "invalid" ? state.errors : {}
   const selectedInquiry = inquiryType || values?.inquiryType || ""
+  const selectedBudgetCurrency = budgetCurrency || values?.budgetCurrency || ""
+  const selectedBudgetOptions = selectedBudgetCurrency in budgetOptionsByCurrency
+    ? budgetOptionsByCurrency[selectedBudgetCurrency as keyof typeof budgetOptionsByCurrency]
+    : []
 
   useEffect(() => {
     if (state.status === "error") toast.error(state.message)
     if (state.status === "invalid" || state.status === "error") {
       setInquiryType(state.values.inquiryType)
+      setBudgetCurrency(state.values.budgetCurrency)
     }
     if (state.status !== "sent") return
 
     setInquiryType("")
+    setBudgetCurrency("")
     setShowSuccess(true)
     const timeout = window.setTimeout(() => setShowSuccess(false), 4500)
     return () => window.clearTimeout(timeout)
@@ -136,7 +143,7 @@ function BriefForm() {
 
             {selectedInquiry === "Freelance project" ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-4">
-                <Field data-invalid={Boolean(errors.scope) || undefined}>
+                <Field data-invalid={Boolean(errors.scope) || undefined} className="sm:col-span-2">
                   <FieldLabel htmlFor="brief-scope" className={labelClassName}>
                     Project scope
                   </FieldLabel>
@@ -152,20 +159,49 @@ function BriefForm() {
                   </NativeSelect>
                   <FieldError id="brief-scope-error">{errors.scope}</FieldError>
                 </Field>
-                <Field data-invalid={Boolean(errors.budget) || undefined}>
-                  <FieldLabel htmlFor="brief-budget" className={labelClassName}>
+                <Field
+                  data-invalid={Boolean(errors.budgetCurrency) || Boolean(errors.budget) || undefined}
+                  className="sm:col-span-2"
+                >
+                  <FieldLabel htmlFor="brief-budgetCurrency" className={labelClassName}>
                     Project budget
                   </FieldLabel>
-                  <NativeSelect key={values?.budget} {...fieldProps("budget")} className={selectClassName}>
-                    <NativeSelectOption value="" disabled>
-                      Estimated budget
-                    </NativeSelectOption>
-                    {budgetOptions.map((option) => (
-                      <NativeSelectOption key={option} value={option}>
-                        {option}
+                  <div className="grid grid-cols-[1fr_1.5fr] gap-3">
+                    <NativeSelect
+                      id="brief-budgetCurrency"
+                      name="budgetCurrency"
+                      value={selectedBudgetCurrency}
+                      onChange={(event) => setBudgetCurrency(event.target.value)}
+                      aria-invalid={errors.budgetCurrency ? true : undefined}
+                      aria-describedby={errors.budgetCurrency ? "brief-budgetCurrency-error" : undefined}
+                      className={selectClassName}
+                    >
+                      <NativeSelectOption value="" disabled>
+                        Currency
                       </NativeSelectOption>
-                    ))}
-                  </NativeSelect>
+                      {budgetCurrencyOptions.map((option) => (
+                        <NativeSelectOption key={option} value={option}>
+                          {option}
+                        </NativeSelectOption>
+                      ))}
+                    </NativeSelect>
+                    <NativeSelect
+                      key={selectedBudgetCurrency}
+                      {...fieldProps("budget")}
+                      disabled={!selectedBudgetCurrency}
+                      className={selectClassName}
+                    >
+                      <NativeSelectOption value="" disabled>
+                        {selectedBudgetCurrency ? "Select range" : "Choose currency"}
+                      </NativeSelectOption>
+                      {selectedBudgetOptions.map((option) => (
+                        <NativeSelectOption key={option} value={option}>
+                          {option}
+                        </NativeSelectOption>
+                      ))}
+                    </NativeSelect>
+                  </div>
+                  <FieldError id="brief-budgetCurrency-error">{errors.budgetCurrency}</FieldError>
                   <FieldError id="brief-budget-error">{errors.budget}</FieldError>
                 </Field>
               </div>

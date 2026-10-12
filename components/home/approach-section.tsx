@@ -2,7 +2,7 @@ import { PortraitCard } from "@/components/home/portrait-card"
 import { PrincipleCard } from "@/components/home/principle-card"
 import { Container } from "@/components/layout/container"
 import { LineReveal } from "@/components/motion/line-reveal"
-import { Reveal, RevealGroup, RevealItem } from "@/components/motion/reveal"
+import { Reveal } from "@/components/motion/reveal"
 import { Accent } from "@/components/typography/accent"
 import { Eyebrow } from "@/components/typography/eyebrow"
 import { principles, tooling } from "@/content/about"
@@ -34,17 +34,16 @@ export function ApproachSection() {
           </div>
 
           <Eyebrow className="mt-16">Tooling</Eyebrow>
-          <RevealGroup as="ul" stagger={0.05} className="mt-8 flex flex-wrap gap-3">
+          <ul className="mt-8 flex flex-wrap gap-3">
             {tooling.map((tool) => (
-              <RevealItem
-                as="li"
+              <li
                 key={tool}
                 className="rounded-full border border-white/25 px-5 py-2.5 text-[0.9375rem] font-semibold uppercase transition-colors duration-300 hover:border-gold hover:text-gold"
               >
                 {tool}
-              </RevealItem>
+              </li>
             ))}
-          </RevealGroup>
+          </ul>
         </div>
       </Container>
     </section>

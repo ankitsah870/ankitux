@@ -1,5 +1,5 @@
 export const aboutIntro =
-  "I’m Ankit Sah, a UI/UX and Product Designer currently working at Codersbay Technology. I design web and mobile experiences across SaaS, dashboards, AI, IoT, and service platforms."
+  "I’m Ankit Sah, a UI/UX and product designer at Codersbay Technology. My work spans eight domains: fintech, mobility and logistics, IoT and telematics, AI and SaaS, HR tech, consumer services, visual discovery, and agency websites. Across projects like SafarTrak and SerQ, the context changes. The work stays the same: understand the system, find where it breaks down, and make the experience deliberate."
 
 export type Principle = {
   index: string
@@ -19,7 +19,7 @@ export const principles: Principle[] = [
 export const tooling = [
   "Figma",
   "Framer",
-  "Web Flow",
+  "Webflow",
   "Spline",
   "Wix Studio",
   "Adobe Photoshop",

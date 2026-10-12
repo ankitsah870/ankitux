@@ -41,8 +41,8 @@ export function HeroSection() {
 
           <Reveal immediate delay={0.6} offset={16}>
             <p className="mt-7 max-w-[25rem] text-base leading-snug text-foreground/90 sm:text-[1.0625rem]">
-              I help teams turn complex product ideas, workflows, and data into clear, scalable web and mobile
-              experiences.
+              I’m Ankit Sah, a UI/UX and product designer based in India. I help teams turn complex ideas and workflows
+              into clear web and mobile experiences.
             </p>
           </Reveal>
 

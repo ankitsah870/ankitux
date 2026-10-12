@@ -32,7 +32,10 @@ export function HeroGlow({ className }: { className?: string }) {
 
   return (
     <div aria-hidden className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}>
-      <motion.div style={{ x, y }} className="absolute top-[54%] right-[-12%] aspect-[1.45] w-[min(58rem,64vw)] -translate-y-1/2">
+      <motion.div
+        style={{ x, y }}
+        className="absolute top-[54%] right-[-12%] aspect-[1.45] w-[min(58rem,64vw)] -translate-y-1/2 max-sm:top-[66%] max-sm:right-0 max-sm:aspect-[1.2] max-sm:w-[115vw]"
+      >
         <motion.div
           className="absolute inset-0"
           initial={{ opacity: 0, scale: 0.9 }}

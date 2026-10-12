@@ -34,8 +34,8 @@ export const siteConfig = {
   url: siteUrl,
   locale: "en_IN",
   email: "ankitsah8716@gmail.com",
-  resumeHref: "/ankit-sah-resume.pdf",
-  resumeFileName: "Ankit-Sah-Resume.pdf",
+  resumeHref: "/Ankit%20Kumar's%20CV.pdf",
+  resumeFileName: "Ankit Kumar's CV.pdf",
   location: {
     label: "Based in India",
     city: "Patna",

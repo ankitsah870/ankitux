@@ -36,5 +36,5 @@ assets/images/work/      case-study cover images
 - `content/projects.ts` — case studies come from the CV; Upstage isn't in the
   CV yet, so it only has an overview. Covers live in
   `assets/images/work/<slug>.jpg` (OG images read them by slug).
-- `public/ankit-sah-resume.pdf` — the CV served by “Download resume”; replace
+- `public/Ankit Kumar's CV.pdf` — the CV served by “Download resume”; replace
   the file to update it.
